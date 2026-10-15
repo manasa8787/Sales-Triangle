@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Html5Qrcode Library (قارئ الباركود بالكاميرا) -->
+    <!-- Html5Qrcode Library (قارئ الباركود السريع) -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <style>
         body {
@@ -60,10 +60,8 @@
         </span>
     </div>
 
-    <!-- شبكة القوائم (البطاقات البيضاء) -->
+    <!-- شبكة القوائم -->
     <main class="p-4 grid grid-cols-2 gap-4 max-w-sm mx-auto">
-        
-        <!-- المبيعات -->
         <div onclick="openModal('sales')" class="app-card rounded-2xl p-4 flex flex-col items-center text-center shadow-lg cursor-pointer">
             <div class="w-14 h-14 my-2 flex items-center justify-center text-[#f59e0b] text-4xl">
                 <i class="fa-solid fa-barcode"></i>
@@ -72,7 +70,6 @@
             <p class="text-[11px] text-slate-500">بيع بالقطعة أو بالكاميرا</p>
         </div>
 
-        <!-- المشتريات -->
         <div onclick="openModal('purchases')" class="app-card rounded-2xl p-4 flex flex-col items-center text-center shadow-lg cursor-pointer">
             <div class="w-14 h-14 my-2 flex items-center justify-center text-[#f59e0b] text-4xl">
                 <i class="fa-solid fa-boxes-packing"></i>
@@ -81,16 +78,14 @@
             <p class="text-[11px] text-slate-500">إضافة وتغذية التكلفة والمخزون</p>
         </div>
 
-        <!-- المخزن -->
         <div onclick="openModal('warehouse')" class="app-card rounded-2xl p-4 flex flex-col items-center text-center shadow-lg cursor-pointer">
             <div class="w-14 h-14 my-2 flex items-center justify-center text-[#f59e0b] text-4xl">
                 <i class="fa-solid fa-warehouse"></i>
             </div>
             <h2 class="text-lg font-bold mb-1">المخزن</h2>
-            <p class="text-[11px] text-slate-500">إدارة المواد والمخزون</p>
+            <p class="text-[11px] text-slate-500">إدارة المواد والباركود</p>
         </div>
 
-        <!-- الفواتير -->
         <div onclick="openModal('invoices')" class="app-card rounded-2xl p-4 flex flex-col items-center text-center shadow-lg cursor-pointer">
             <div class="w-14 h-14 my-2 flex items-center justify-center text-[#f59e0b] text-4xl">
                 <i class="fa-solid fa-receipt"></i>
@@ -99,7 +94,6 @@
             <p class="text-[11px] text-slate-500">أرشيف المبيعات والمشتريات</p>
         </div>
 
-        <!-- الحسابات -->
         <div onclick="openModal('accounts')" class="app-card rounded-2xl p-4 flex flex-col items-center text-center shadow-lg cursor-pointer">
             <div class="w-14 h-14 my-2 flex items-center justify-center text-[#f59e0b] text-4xl">
                 <i class="fa-solid fa-calculator"></i>
@@ -108,7 +102,6 @@
             <p class="text-[11px] text-slate-500">تسديد الآجل والمصاريف</p>
         </div>
 
-        <!-- التقارير -->
         <div onclick="openModal('reports')" class="app-card rounded-2xl p-4 flex flex-col items-center text-center shadow-lg cursor-pointer">
             <div class="w-14 h-14 my-2 flex items-center justify-center text-[#f59e0b] text-4xl">
                 <i class="fa-solid fa-chart-line"></i>
@@ -116,10 +109,9 @@
             <h2 class="text-lg font-bold mb-1">التقارير</h2>
             <p class="text-[11px] text-slate-500">تقرير يومي، شهري وسنوي</p>
         </div>
-
     </main>
 
-    <!-- البطاقة السفلية الإعدادات والنسخ الاحتياطي -->
+    <!-- البطاقة السفلية -->
     <div class="max-w-sm mx-auto px-4 mt-1">
         <div onclick="openModal('settings')" class="app-card rounded-2xl p-4 flex items-center gap-3 shadow-lg cursor-pointer">
             <div class="w-12 h-12 flex items-center justify-center text-[#f59e0b] text-3xl shrink-0">
@@ -140,9 +132,7 @@
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
-            <div id="modalContent" class="text-slate-200 text-sm space-y-3">
-                <!-- المحتوى المنبثق -->
-            </div>
+            <div id="modalContent" class="text-slate-200 text-sm space-y-3"></div>
         </div>
     </div>
 
@@ -194,7 +184,6 @@
             stopCameraScanner();
             const modal = document.getElementById('modal');
             const title = document.getElementById('modalTitle');
-
             modal.classList.remove('hidden');
 
             if(type === 'sales') {
@@ -221,23 +210,33 @@
             }
         }
 
-        /* ================= تشغيل وإيقاف كاميرا الباركود ================= */
+        /* ================= قارئ باركود فائق السرعة ================= */
+        let activeScannerTarget = null;
+
         function toggleCameraScanner(targetType) {
+            activeScannerTarget = targetType;
             const scannerContainer = document.getElementById('cameraScannerBox');
             if (!scannerContainer) return;
 
             if (scannerContainer.classList.contains('hidden')) {
                 scannerContainer.classList.remove('hidden');
+                
                 html5QrcodeScanner = new Html5Qrcode("reader");
-                const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+                const config = { 
+                    fps: 30, 
+                    qrbox: { width: 260, height: 130 },
+                    aspectRatio: 1.77778
+                };
 
                 html5QrcodeScanner.start(
                     { facingMode: "environment" }, 
                     config, 
-                    (decodedText) => { onBarcodeScannedSuccess(decodedText, targetType); },
+                    (decodedText) => { 
+                        onBarcodeScannedSuccess(decodedText); 
+                    },
                     () => {}
                 ).catch(() => {
-                    alert("تعذر فتح الكاميرا، يرجى منح إذن الكاميرا للتطبيق.");
+                    alert("تعذر فتح الكاميرا، يرجى السماح باستخدام الكاميرا للمتصفح.");
                     scannerContainer.classList.add('hidden');
                 });
             } else {
@@ -251,28 +250,48 @@
                     html5QrcodeScanner = null;
                     const box = document.getElementById('cameraScannerBox');
                     if(box) box.classList.add('hidden');
-                }).catch(() => {});
+                }).catch(() => {
+                    html5QrcodeScanner = null;
+                    const box = document.getElementById('cameraScannerBox');
+                    if(box) box.classList.add('hidden');
+                });
             }
         }
 
-        function onBarcodeScannedSuccess(barcodeValue, targetType) {
+        function onBarcodeScannedSuccess(barcodeValue) {
             stopCameraScanner();
-            if (targetType === 'sale') {
-                const stockItem = warehouseStock.find(x => x.barcode === barcodeValue || x.name.includes(barcodeValue));
+            
+            if (activeScannerTarget === 'sale') {
+                // وضع الباركود في حقل باركود المبيعات المفصول
+                document.getElementById('saleItemBarcode').value = barcodeValue;
+                
+                // البحث التلقائي في المخزن وجلب الاسم والسعر
+                const stockItem = warehouseStock.find(x => x.barcode && x.barcode.trim() === barcodeValue.trim());
                 if (stockItem) {
                     document.getElementById('saleItemName').value = stockItem.name;
                     document.getElementById('saleItemPrice').value = stockItem.sellPrice;
-                    addSaleItem();
                 } else {
                     document.getElementById('saleItemName').value = `مادة (${barcodeValue})`;
                     document.getElementById('saleItemPrice').value = 5000;
                 }
-            } else if (targetType === 'purchase') {
-                document.getElementById('buyItemName').value = `مادة (${barcodeValue})`;
+            } else if (activeScannerTarget === 'purchase') {
+                document.getElementById('buyItemBarcode').value = barcodeValue;
+                const existing = warehouseStock.find(x => x.barcode && x.barcode.trim() === barcodeValue.trim());
+                if(existing) {
+                    document.getElementById('buyItemName').value = existing.name;
+                    document.getElementById('buyCostPrice').value = existing.cost;
+                    document.getElementById('suggestedSellPrice').value = existing.sellPrice;
+                }
+            } else if (activeScannerTarget === 'warehouse_search') {
+                const searchInput = document.getElementById('warehouseSearch');
+                if(searchInput) {
+                    searchInput.value = barcodeValue;
+                    filterWarehouseList();
+                }
             }
         }
 
-        /* ================= 1. واجهة المبيعات مع الكاميرا ================= */
+        /* ================= 1. واجهة المبيعات (حقل باركود مفصول) ================= */
         function renderSalesUI() {
             currentTradeType = 'cash';
             const content = document.getElementById('modalContent');
@@ -295,7 +314,7 @@
 
                 <div>
                     <button onclick="toggleCameraScanner('sale')" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
-                        <i class="fa-solid fa-camera text-base"></i> تشغيل كاميرا الباركود
+                        <i class="fa-solid fa-camera text-base"></i> مسح باركود المادة بالكاميرا
                     </button>
                     <div id="cameraScannerBox" class="hidden mt-2 bg-black rounded-xl p-2 border border-emerald-500/50">
                         <div id="reader" class="w-full"></div>
@@ -304,12 +323,30 @@
 
                 <div class="bg-[#0b132b] p-2.5 rounded-xl border border-blue-900/60 space-y-2">
                     <span class="text-xs text-[#f59e0b] font-bold block">إضافة مادة للفاتورة:</span>
-                    <input type="text" id="saleItemName" placeholder="اسم المادة" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white text-xs">
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="saleItemQty" value="1" placeholder="العدد" class="bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
-                        <input type="number" id="saleItemPrice" placeholder="سعر البيع" class="bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                    
+                    <!-- حقل الباركود المفصول للمبيعات -->
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">باركود المادة:</label>
+                        <input type="text" id="saleItemBarcode" placeholder="أدخل أو امسح الباركود" oninput="lookupSaleBarcode()" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white text-xs font-mono">
                     </div>
-                    <button onclick="addSaleItem()" class="w-full bg-[#f59e0b] text-black font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-plus"></i> إضافة للفاتورة</button>
+
+                    <!-- حقل اسم المادة المفصول -->
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">اسم المادة:</label>
+                        <input type="text" id="saleItemName" placeholder="اسم المادة" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white text-xs">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5">العدد:</label>
+                            <input type="number" id="saleItemQty" value="1" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5">سعر البيع:</label>
+                            <input type="number" id="saleItemPrice" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                        </div>
+                    </div>
+                    <button onclick="addSaleItem()" class="w-full bg-[#f59e0b] text-black font-bold py-2 rounded-lg text-xs mt-1"><i class="fa-solid fa-plus"></i> إضافة للفاتورة</button>
                 </div>
                 <div class="max-h-28 overflow-y-auto border border-blue-900/60 rounded-xl bg-[#0b132b] p-2 space-y-1" id="salesItemsTable"></div>
                 <div class="bg-[#0b132b] p-3 rounded-xl border border-blue-900/80 space-y-2 text-xs">
@@ -328,17 +365,29 @@
             updateSalesUI();
         }
 
+        function lookupSaleBarcode() {
+            const barcodeVal = document.getElementById('saleItemBarcode').value.trim();
+            if(!barcodeVal) return;
+            const stockItem = warehouseStock.find(x => x.barcode && x.barcode.trim() === barcodeVal);
+            if(stockItem) {
+                document.getElementById('saleItemName').value = stockItem.name;
+                document.getElementById('saleItemPrice').value = stockItem.sellPrice;
+            }
+        }
+
         function addSaleItem() {
             const name = document.getElementById('saleItemName').value;
+            const barcode = document.getElementById('saleItemBarcode').value.trim();
             const qty = parseFloat(document.getElementById('saleItemQty').value) || 1;
             const price = parseFloat(document.getElementById('saleItemPrice').value) || 0;
 
-            if(!name || price <= 0) { alert('يرجى كتابة الاسم والسعر بشكل صحيح'); return; }
+            if(!name || price <= 0) { alert('يرجى كتابة اسم المادة وسعر البيع'); return; }
 
-            salesItemsList.push({ name, qty, price, total: qty * price });
+            salesItemsList.push({ name, barcode, qty, price, total: qty * price });
             updateSalesUI();
 
             document.getElementById('saleItemName').value = '';
+            document.getElementById('saleItemBarcode').value = '';
             document.getElementById('saleItemQty').value = '1';
             document.getElementById('saleItemPrice').value = '';
         }
@@ -353,6 +402,13 @@
             const invNum = `#INV-${salesInvoiceCounter}`;
             const now = new Date();
 
+            salesItemsList.forEach(sItem => {
+                const stockItem = warehouseStock.find(w => w.name.trim().toLowerCase() === sItem.name.trim().toLowerCase() || (sItem.barcode && w.barcode === sItem.barcode));
+                if (stockItem) {
+                    stockItem.qty = Math.max(0, stockItem.qty - sItem.qty);
+                }
+            });
+
             allInvoices.unshift({
                 invNum, category: 'sale', tradeType: currentTradeType, partyName: customer,
                 items: [...salesItemsList], subTotal, discount, finalTotal,
@@ -363,7 +419,7 @@
             });
 
             saveData();
-            alert(`تم حفظ الفاتورة (${invNum}) بنجاح!`);
+            alert(`تم حفظ الفاتورة (${invNum}) وخصم الكميات من المخزن بنجاح!`);
 
             if(shouldPrint) printInvoice(invNum);
 
@@ -402,7 +458,7 @@
             document.getElementById('salesFinalTotal').innerText = Math.max(0, subTotal - discount).toLocaleString('ar-IQ') + ' د.ع';
         }
 
-        /* ================= 2. واجهة المشتريات مع الكاميرا ================= */
+        /* ================= 2. واجهة المشتريات ================= */
         function renderPurchasesUI() {
             currentTradeType = 'cash';
             const content = document.getElementById('modalContent');
@@ -425,7 +481,7 @@
 
                 <div>
                     <button onclick="toggleCameraScanner('purchase')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 rounded-xl text-xs flex items-center justify-center gap-2 shadow-md">
-                        <i class="fa-solid fa-camera text-base"></i> تشغيل كاميرا الباركود
+                        <i class="fa-solid fa-camera text-base"></i> مسح باركود المادة بالكاميرا
                     </button>
                     <div id="cameraScannerBox" class="hidden mt-2 bg-black rounded-xl p-2 border border-blue-500/50">
                         <div id="reader" class="w-full"></div>
@@ -434,16 +490,38 @@
 
                 <div class="bg-[#0b132b] p-2.5 rounded-xl border border-blue-900/60 space-y-2">
                     <span class="text-xs text-[#f59e0b] font-bold block">إضافة مادة للمخزن:</span>
-                    <input type="text" id="buyItemName" placeholder="اسم المادة" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white text-xs">
+                    
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">باركود المادة:</label>
+                        <input type="text" id="buyItemBarcode" placeholder="أدخل أو امسح الباركود" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white text-xs font-mono">
+                    </div>
+
+                    <div>
+                        <label class="text-[10px] text-slate-400 block mb-0.5">اسم المادة:</label>
+                        <input type="text" id="buyItemName" placeholder="اسم المادة" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white text-xs">
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="buyItemQty" value="1" placeholder="العدد" class="bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
-                        <input type="number" id="buyCostPrice" oninput="calcSellingPrice()" placeholder="التكلفة" class="bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5">العدد:</label>
+                            <input type="number" id="buyItemQty" value="1" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5">التكلفة:</label>
+                            <input type="number" id="buyCostPrice" oninput="calcSellingPrice()" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                        </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <input type="number" id="profitMargin" value="20" oninput="calcSellingPrice()" placeholder="نسبة الربح %" class="bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
-                        <input type="number" id="suggestedSellPrice" placeholder="سعر البيع" class="bg-[#1c294d] border border-amber-500/50 rounded-lg p-1.5 text-amber-400 font-bold text-xs">
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5">نسبة الربح %:</label>
+                            <input type="number" id="profitMargin" value="20" oninput="calcSellingPrice()" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-1.5 text-white text-xs">
+                        </div>
+                        <div>
+                            <label class="text-[10px] text-slate-400 block mb-0.5">سعر البيع المقترح:</label>
+                            <input type="number" id="suggestedSellPrice" class="w-full bg-[#1c294d] border border-amber-500/50 rounded-lg p-1.5 text-amber-400 font-bold text-xs">
+                        </div>
                     </div>
-                    <button onclick="addPurchaseItem()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg text-xs"><i class="fa-solid fa-plus"></i> إضافة للفاتورة وللمخزن</button>
+                    <button onclick="addPurchaseItem()" class="w-full bg-blue-600 text-white font-bold py-2 rounded-lg text-xs mt-1"><i class="fa-solid fa-plus"></i> إضافة للفاتورة وللمخزن</button>
                 </div>
                 <div class="max-h-28 overflow-y-auto border border-blue-900/60 rounded-xl bg-[#0b132b] p-2 space-y-1" id="purchasesItemsTable"></div>
                 <div class="bg-[#0b132b] p-3 rounded-xl border border-blue-900/80 space-y-2 text-xs">
@@ -464,27 +542,30 @@
 
         function addPurchaseItem() {
             const name = document.getElementById('buyItemName').value;
+            const barcode = document.getElementById('buyItemBarcode').value.trim();
             const qty = parseFloat(document.getElementById('buyItemQty').value) || 1;
             const cost = parseFloat(document.getElementById('buyCostPrice').value) || 0;
             const margin = parseFloat(document.getElementById('profitMargin').value) || 0;
             const sellPrice = parseFloat(document.getElementById('suggestedSellPrice').value) || 0;
 
-            if(!name || cost <= 0) { alert('أدخل الاسم والتكلفة'); return; }
+            if(!name || cost <= 0) { alert('يرجى كتابة اسم المادة وسعر التكلفة'); return; }
 
-            purchasesItemsList.push({ name, qty, cost, margin, sellPrice, total: qty * cost });
+            purchasesItemsList.push({ name, barcode, qty, cost, margin, sellPrice, total: qty * cost });
 
-            const existing = warehouseStock.find(x => x.name.trim().toLowerCase() === name.trim().toLowerCase());
+            const existing = warehouseStock.find(x => x.name.trim().toLowerCase() === name.trim().toLowerCase() || (barcode && x.barcode === barcode));
             if(existing) {
                 existing.qty += qty;
                 existing.cost = cost;
                 existing.sellPrice = sellPrice;
+                existing.barcode = barcode || existing.barcode;
             } else {
-                warehouseStock.push({ id: Date.now(), name, qty, cost, sellPrice });
+                warehouseStock.push({ id: Date.now(), name, barcode, qty, cost, sellPrice });
             }
             saveData();
             updatePurchasesUI();
 
             document.getElementById('buyItemName').value = '';
+            document.getElementById('buyItemBarcode').value = '';
             document.getElementById('buyItemQty').value = '1';
             document.getElementById('buyCostPrice').value = '';
             document.getElementById('suggestedSellPrice').value = '';
@@ -510,7 +591,7 @@
             });
 
             saveData();
-            alert(`تم حفظ فاتورة المشتريات (${invNum})`);
+            alert(`تم حفظ فاتورة المشتريات وتغذية المخزن (${invNum})`);
 
             if(shouldPrint) printInvoice(invNum);
 
@@ -531,7 +612,7 @@
             } else {
                 table.innerHTML = purchasesItemsList.map((item, i) => `
                     <div class="flex justify-between items-center bg-[#1c294d] p-2 rounded-lg text-xs">
-                        <span>${item.name} (×${item.qty})</span>
+                        <span>${item.name} ${item.barcode ? '<span class="text-amber-400 font-mono">(' + item.barcode + ')</span>' : ''} (×${item.qty})</span>
                         <div class="flex items-center gap-2">
                             <span class="text-[#f59e0b] font-bold">${item.total.toLocaleString('ar-IQ')} د.ع</span>
                             <button onclick="removePurchaseItem(${i})" class="text-red-400"><i class="fa-solid fa-trash-can"></i></button>
@@ -553,15 +634,23 @@
         function renderWarehouseUI() {
             const content = document.getElementById('modalContent');
             content.innerHTML = `
-                <div class="relative mb-2">
-                    <input type="text" id="warehouseSearch" oninput="filterWarehouseList()" placeholder="بحث باسم المادة في المخزن..." class="w-full bg-[#0b132b] border border-blue-800 rounded-lg p-2.5 pl-9 text-white text-xs">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-[#f59e0b]"></i>
+                <div class="flex gap-2 mb-2">
+                    <div class="relative flex-1">
+                        <input type="text" id="warehouseSearch" oninput="filterWarehouseList()" placeholder="بحث بالاسم أو الباركود..." class="w-full bg-[#0b132b] border border-blue-800 rounded-lg p-2.5 pl-9 text-white text-xs">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-[#f59e0b]"></i>
+                    </div>
+                    <button onclick="toggleCameraScanner('warehouse_search')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3 py-2 rounded-lg text-xs flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-camera text-base"></i>
+                    </button>
                 </div>
-                <div class="flex justify-between items-center text-xs bg-[#0b132b] p-2.5 rounded-xl border border-blue-900/60 text-slate-300">
+                <div id="cameraScannerBox" class="hidden mb-2 bg-black rounded-xl p-2 border border-emerald-500/50">
+                    <div id="reader" class="w-full"></div>
+                </div>
+                <div class="flex justify-between items-center text-xs bg-[#0b132b] p-2.5 rounded-xl border border-blue-900/60 text-slate-300 mb-2">
                     <span>عدد المواد: <strong class="text-[#f59e0b]">${warehouseStock.length}</strong></span>
                     <span>إجمالي القطع: <strong class="text-green-400">${warehouseStock.reduce((s, x) => s + x.qty, 0)}</strong></span>
                 </div>
-                <div class="max-h-72 overflow-y-auto space-y-2 border border-blue-900/60 rounded-xl bg-[#0b132b] p-2" id="warehouseItemsList"></div>
+                <div class="max-h-64 overflow-y-auto space-y-2 border border-blue-900/60 rounded-xl bg-[#0b132b] p-2" id="warehouseItemsList"></div>
             `;
             updateWarehouseListUI(warehouseStock);
         }
@@ -575,10 +664,13 @@
             listContainer.innerHTML = items.map(item => `
                 <div class="bg-[#1c294d] border border-blue-800/80 p-2.5 rounded-xl text-xs space-y-1">
                     <div class="flex justify-between items-center">
-                        <span class="font-bold text-white text-sm">${item.name}</span>
+                        <div>
+                            <span class="font-bold text-white text-sm block">${item.name}</span>
+                            ${item.barcode ? '<span class="text-[10px] text-amber-400 font-mono">باركود: ' + item.barcode + '</span>' : '<span class="text-[10px] text-slate-500">بدون باركود</span>'}
+                        </div>
                         <div class="flex gap-1.5">
-                            <button onclick="editWarehouseItem(${item.id})" class="bg-[#f59e0b] text-black px-2 py-1 rounded-md font-bold text-[11px]"><i class="fa-solid fa-pen"></i> تعديل</button>
-                            <button onclick="deleteWarehouseItem(${item.id})" class="bg-red-600 text-white px-2 py-1 rounded-md font-bold text-[11px]"><i class="fa-solid fa-trash"></i> حذف</button>
+                            <button onclick="editWarehouseItem(${item.id})" class="bg-[#f59e0b] text-black px-2 py-1 rounded-md font-bold text-[11px]"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteWarehouseItem(${item.id})" class="bg-red-600 text-white px-2 py-1 rounded-md font-bold text-[11px]"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>
                     <div class="grid grid-cols-3 gap-1 text-[11px] text-slate-300 pt-1 border-t border-blue-900/60">
@@ -592,18 +684,20 @@
 
         function filterWarehouseList() {
             const query = document.getElementById('warehouseSearch').value.toLowerCase();
-            updateWarehouseListUI(warehouseStock.filter(item => item.name.toLowerCase().includes(query)));
+            updateWarehouseListUI(warehouseStock.filter(item => item.name.toLowerCase().includes(query) || (item.barcode && item.barcode.toLowerCase().includes(query))));
         }
 
         function editWarehouseItem(id) {
             const item = warehouseStock.find(x => x.id === id);
             if(!item) return;
             const newName = prompt('تعديل الاسم:', item.name); if(newName === null) return;
+            const newBarcode = prompt('تعديل الباركود:', item.barcode || ''); if(newBarcode === null) return;
             const newQty = prompt('تعديل الكمية:', item.qty); if(newQty === null) return;
             const newCost = prompt('تعديل التكلفة:', item.cost); if(newCost === null) return;
             const newSell = prompt('تعديل البيع:', item.sellPrice); if(newSell === null) return;
 
             item.name = newName || item.name;
+            item.barcode = newBarcode.trim();
             item.qty = parseFloat(newQty) || item.qty;
             item.cost = parseFloat(newCost) || item.cost;
             item.sellPrice = parseFloat(newSell) || item.sellPrice;
@@ -754,7 +848,7 @@
             }
         }
 
-        /* ================= 5. واجهة الحسابات ================= */
+        /* ================= 5. الحسابات والمصاريف ================= */
         function renderAccountsUI(tab) {
             const content = document.getElementById('modalContent');
             const creditSalesTotal = allInvoices.filter(i => i.category === 'sale' && i.tradeType === 'credit').reduce((sum, i) => sum + (i.finalTotal - (i.paidAmount || 0)), 0);
@@ -892,7 +986,7 @@
             `).join('');
         }
 
-        /* ================= 6. واجهة التقارير ================= */
+        /* ================= 6. التقارير المالية ================= */
         function renderReportsUI(period) {
             const content = document.getElementById('modalContent');
             content.innerHTML = `
@@ -941,7 +1035,7 @@
                         <strong class="font-mono text-base text-[#f59e0b]">${totalSales.toLocaleString('ar-IQ')} د.ع</strong>
                     </div>
                     <div class="flex justify-between items-center bg-[#1c294d] p-2.5 rounded-lg">
-                        <span class="text-slate-300">إجمالي التكلفة (سعر التكلفة):</span>
+                        <span class="text-slate-300">إجمالي التكلفة:</span>
                         <strong class="font-mono text-base text-red-400">-${totalCost.toLocaleString('ar-IQ')} د.ع</strong>
                     </div>
                     <div class="flex justify-between items-center bg-[#1c294d] p-2.5 rounded-lg">
@@ -956,7 +1050,7 @@
             `;
         }
 
-        /* ================= 7. واجهة الإعدادات ================= */
+        /* ================= 7. الإعدادات والنسخ الاحتياطي ================= */
         function renderSettingsUI() {
             const content = document.getElementById('modalContent');
             content.innerHTML = `
@@ -966,15 +1060,15 @@
                     </span>
                     <div>
                         <label class="text-slate-400 block mb-1">اسم المحل:</label>
-                        <input type="text" id="cfgStoreName" value="${storeSettings.storeName}" placeholder="اسم المحل" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white">
+                        <input type="text" id="cfgStoreName" value="${storeSettings.storeName}" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white">
                     </div>
                     <div>
                         <label class="text-slate-400 block mb-1">رقم الهاتف:</label>
-                        <input type="text" id="cfgPhone" value="${storeSettings.phone}" placeholder="رقم الهاتف" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white">
+                        <input type="text" id="cfgPhone" value="${storeSettings.phone}" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white">
                     </div>
                     <div>
                         <label class="text-slate-400 block mb-1">العنوان:</label>
-                        <input type="text" id="cfgAddress" value="${storeSettings.address}" placeholder="العنوان والفرع" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white">
+                        <input type="text" id="cfgAddress" value="${storeSettings.address}" class="w-full bg-[#1c294d] border border-blue-800 rounded-lg p-2 text-white">
                     </div>
                     <button onclick="saveStoreSettingsInfo()" class="w-full bg-[#f59e0b] text-black font-bold py-2 rounded-lg text-xs mt-1">حفظ معلومات المحل</button>
                 </div>
