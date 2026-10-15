@@ -1,2 +1,0 @@
-# Sales-Triangle
-index.html
